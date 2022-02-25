@@ -20,6 +20,7 @@
 		<module>flinkx-metrics</module>
 		<module>flinkx-dirtydata-collectors</module>
 		<module>flinkx-restore</module>
+		<module>flinkx-udf</module>
 	</modules>
 
 	<properties>

@@ -172,6 +172,16 @@ public class DynamicKafkaDeserializationSchema implements KafkaDeserializationSc
 
     protected void beforeDeserialize(ConsumerRecord<byte[], byte[]> record) {
         if (numReadCounter.getLocalValue() % dataPrintFrequency == 0) {
+            //            try {
+            //                FileUtils.write(
+            //                        new
+            // File("/Users/artefact/IdeaProjects/flinkx/dist/jobs/data.txt"),
+            //                        new String(record.value(), StandardCharsets.UTF_8) +
+            // System.lineSeparator(),
+            //                        true);
+            //            } catch (IOException e) {
+            //                e.printStackTrace();
+            //            }
             LOG.info("receive source data:" + new String(record.value(), StandardCharsets.UTF_8));
         }
 

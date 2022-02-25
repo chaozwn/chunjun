@@ -30,7 +30,6 @@ import com.dtstack.flinkx.metrics.AccumulatorCollector;
 import com.dtstack.flinkx.metrics.BaseMetric;
 import com.dtstack.flinkx.restore.FormatState;
 import com.dtstack.flinkx.sink.DirtyDataManager;
-import com.dtstack.flinkx.sink.ErrorLimiter;
 import com.dtstack.flinkx.sink.WriteErrorTypes;
 import com.dtstack.flinkx.throwable.WriteRecordException;
 import com.dtstack.flinkx.util.ExceptionUtil;
@@ -134,8 +133,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
     protected boolean initAccumulatorAndDirty = true;
     /** 脏数据管理器 */
     protected DirtyDataManager dirtyDataManager;
-    /** 脏数据限制器 */
-    protected ErrorLimiter errorLimiter;
     /** 输出指标组 */
     protected transient BaseMetric outputMetric;
     /** cp和flush互斥条件 */
@@ -308,34 +305,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
             }
         }
 
-        if (errorLimiter != null) {
-            try {
-                errorLimiter.updateErrorInfo();
-            } catch (Exception e) {
-                LOG.warn(
-                        "errorLimiter.updateErrorInfo() Exception:{}",
-                        ExceptionUtil.getErrorMessage(e));
-            }
-
-            try {
-                errorLimiter.checkErrorLimit();
-            } catch (Exception e) {
-                LOG.error(
-                        "errorLimiter.checkErrorLimit() Exception:{}",
-                        ExceptionUtil.getErrorMessage(e));
-                if (closeException != null) {
-                    closeException.addSuppressed(e);
-                } else {
-                    closeException = e;
-                }
-            } finally {
-                if (accumulatorCollector != null) {
-                    accumulatorCollector.close();
-                    accumulatorCollector = null;
-                }
-            }
-        }
-
         if (accumulatorCollector != null) {
             accumulatorCollector.close();
         }
@@ -397,8 +366,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
             if (config.getErrorPercentage() > 0) {
                 errorRatio = (double) config.getErrorPercentage();
             }
-            errorLimiter =
-                    new ErrorLimiter(accumulatorCollector, config.getErrorRecord(), errorRatio);
         }
     }
 
@@ -478,10 +445,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
      * @param rowData 单条数据
      */
     protected void writeSingleRecord(RowData rowData) {
-        if (errorLimiter != null) {
-            errorLimiter.checkErrorLimit();
-        }
-
         try {
             writeSingleRecordInternal(rowData);
         } catch (WriteRecordException e) {
@@ -530,11 +493,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
         // 每2000条打印一次脏数据
         if (errCounter.getLocalValue() % LOG_PRINT_INTERNAL == 0) {
             LOG.error(errMsg);
-        }
-
-        if (errorLimiter != null) {
-            errorLimiter.setErrMsg(errMsg);
-            errorLimiter.setErrorData(rowData);
         }
 
         if (dirtyDataManager != null) {
@@ -709,10 +667,6 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
 
     public void setDirtyDataManager(DirtyDataManager dirtyDataManager) {
         this.dirtyDataManager = dirtyDataManager;
-    }
-
-    public void setErrorLimiter(ErrorLimiter errorLimiter) {
-        this.errorLimiter = errorLimiter;
     }
 
     public FlinkxCommonConf getConfig() {
