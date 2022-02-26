@@ -2,6 +2,8 @@ package com.dtstack.udf;
 
 import org.apache.flink.table.functions.ScalarFunction;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.sql.Timestamp;
 
 /**
@@ -11,6 +13,9 @@ import java.sql.Timestamp;
  */
 public class StringToTimestamp extends ScalarFunction {
     public Timestamp eval(String timestamp) {
+        if (StringUtils.isBlank(timestamp)) {
+            return null;
+        }
         return new Timestamp(Long.parseLong(timestamp));
     }
 }

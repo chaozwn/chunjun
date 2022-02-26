@@ -79,8 +79,7 @@ public class JdbcOutputFormat extends BaseRichOutputFormat {
         executeBatch(jdbcConf.getPostSql());
     }
 
-    @Override
-    protected void openInternal(int taskNumber, int numTasks) {
+    public void init() {
         try {
             dbConn = getConnection();
             // 默认关闭事务自动提交，手动控制事务
@@ -98,14 +97,18 @@ public class JdbcOutputFormat extends BaseRichOutputFormat {
                     LOG.info("updateKey = {}", JsonUtil.toJson(tableIndex));
                 }
             }
-
             buildStmtProxy();
-            LOG.info("subTask[{}}] wait finished", taskNumber);
         } catch (SQLException sqe) {
             throw new IllegalArgumentException("open() failed.", sqe);
         } finally {
             JdbcUtil.commit(dbConn);
         }
+    }
+
+    @Override
+    protected void openInternal(int taskNumber, int numTasks) {
+        this.init();
+        LOG.info("subTask[{}}] wait finished", taskNumber);
     }
 
     public void buildStmtProxy() throws SQLException {
@@ -211,6 +214,12 @@ public class JdbcOutputFormat extends BaseRichOutputFormat {
     @Override
     protected void writeMultipleRecordsInternal() throws Exception {
         try {
+            // 校验connection是否过期
+            if (!stmtProxy.connection.isValid(5)) {
+                this.closeInternal();
+                this.init();
+            }
+
             for (RowData row : rows) {
                 stmtProxy.convertToExternal(row);
                 stmtProxy.addBatch();
@@ -220,6 +229,7 @@ public class JdbcOutputFormat extends BaseRichOutputFormat {
             // 开启了cp，但是并没有使用2pc方式让下游数据可见
             if (Semantic.EXACTLY_ONCE == semantic) {
                 rowsOfCurrentTransaction += rows.size();
+                JdbcUtil.commit(dbConn);
             }
         } catch (Exception e) {
             LOG.warn(

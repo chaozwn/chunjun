@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
                         "ROW<attr_id string,attr_name string,attr_data_type string,attr_value string>"))
 public class ExplodePrAttr extends TableFunction<Row> {
     public void eval(Map<String, String> pr) {
+        if (pr == null || pr.isEmpty()) {
+            collect(Row.of("", null, null, null));
+            return;
+        }
         List<String> params =
                 pr.keySet().stream()
                         .filter(s -> s.startsWith("$zg_epid#"))

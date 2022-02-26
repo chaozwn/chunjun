@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
                         "ROW<property_id string,property_name string,property_date_type string,property_value string>"))
 public class ExplodePropertyAttr extends TableFunction<Row> {
     public void eval(Map<String, String> pr) {
+        if (pr == null || pr.isEmpty()) {
+            collect(Row.of("", null, null, null));
+            return;
+        }
         List<String> params =
                 pr.keySet().stream()
                         .filter(s -> s.startsWith("$zg_upid#"))
