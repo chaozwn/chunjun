@@ -89,8 +89,6 @@ public class PropertiesUtil {
      */
     public static void initFlinkxCommonConf(FlinkxCommonConf flinkxCommonConf, SyncConf syncConf) {
         flinkxCommonConf.setSpeedBytes(syncConf.getSpeed().getBytes());
-        flinkxCommonConf.setErrorRecord(syncConf.getErrorLimit().getRecord());
-        flinkxCommonConf.setErrorPercentage(syncConf.getErrorLimit().getPercentage());
         flinkxCommonConf.setSavePointPath(syncConf.getSavePointPath());
         if (syncConf.getMetricPluginConf() != null) {
             flinkxCommonConf.setMetricPluginRoot(
@@ -99,6 +97,8 @@ public class PropertiesUtil {
                             : syncConf.getRemotePluginPath());
             flinkxCommonConf.setMetricPluginName(syncConf.getMetricPluginConf().getPluginName());
             flinkxCommonConf.setMetricProps(syncConf.getMetricPluginConf().getPluginProp());
+            flinkxCommonConf.setRowSizeCalculatorType(
+                    syncConf.getMetricPluginConf().getRowSizeCalculatorType());
         }
     }
 }

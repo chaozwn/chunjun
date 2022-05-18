@@ -21,6 +21,7 @@ import com.dtstack.flinkx.cdc.CdcConf;
 import com.dtstack.flinkx.cdc.RestorationFlatMap;
 import com.dtstack.flinkx.cdc.monitor.fetch.FetcherBase;
 import com.dtstack.flinkx.cdc.monitor.store.StoreBase;
+import com.dtstack.flinkx.conf.OperatorConf;
 import com.dtstack.flinkx.conf.SpeedConf;
 import com.dtstack.flinkx.conf.SyncConf;
 import com.dtstack.flinkx.constants.ConstantValue;
@@ -37,9 +38,11 @@ import com.dtstack.flinkx.sink.SinkFactory;
 import com.dtstack.flinkx.source.SourceFactory;
 import com.dtstack.flinkx.sql.parser.SqlParser;
 import com.dtstack.flinkx.throwable.FlinkxRuntimeException;
+import com.dtstack.flinkx.throwable.JobConfigException;
 import com.dtstack.flinkx.util.DataSyncFactoryUtil;
 import com.dtstack.flinkx.util.ExecuteProcessHelper;
 import com.dtstack.flinkx.util.FactoryHelper;
+import com.dtstack.flinkx.util.JobUtil;
 import com.dtstack.flinkx.util.PluginUtil;
 import com.dtstack.flinkx.util.PrintUtil;
 import com.dtstack.flinkx.util.PropertiesUtil;
@@ -66,6 +69,7 @@ import org.apache.flink.table.types.DataType;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,17 +99,20 @@ public class Main {
 
         Options options = new OptionParser(args).getOptions();
         String job = URLDecoder.decode(options.getJob(), StandardCharsets.UTF_8.name());
+        String replacedJob = JobUtil.replaceJobParameter(options.getP(), job);
         Properties confProperties = PropertiesUtil.parseConf(options.getConfProp());
         StreamExecutionEnvironment env = EnvFactory.createStreamExecutionEnvironment(options);
         StreamTableEnvironment tEnv =
                 EnvFactory.createStreamTableEnvironment(env, confProperties, options.getJobName());
-
+        LOG.info(
+                "Register to table configuration:{}",
+                tEnv.getConfig().getConfiguration().toString());
         switch (EJobType.getByName(options.getJobType())) {
             case SQL:
-                exeSqlJob(env, tEnv, job, options);
+                exeSqlJob(env, tEnv, replacedJob, options);
                 break;
             case SYNC:
-                exeSyncJob(env, tEnv, job, options);
+                exeSyncJob(env, tEnv, replacedJob, options);
                 break;
             default:
                 throw new FlinkxRuntimeException(
@@ -173,10 +180,12 @@ public class Main {
 
         if (!config.getCdcConf().isSkipDDL()) {
             CdcConf cdcConf = config.getCdcConf();
-            FetcherBase fetcher = DataSyncFactoryUtil.discoverFetcher(cdcConf.getMonitor(), config);
-            StoreBase store = DataSyncFactoryUtil.discoverStore(cdcConf.getMonitor(), config);
+            Pair<FetcherBase, StoreBase> monitorPair =
+                    DataSyncFactoryUtil.discoverMonitor(cdcConf.getMonitor(), config);
             dataStreamSource =
-                    dataStreamSource.flatMap(new RestorationFlatMap(fetcher, store, cdcConf));
+                    dataStreamSource.flatMap(
+                            new RestorationFlatMap(
+                                    monitorPair.getLeft(), monitorPair.getRight(), cdcConf));
         }
 
         if (config.getNameMappingConf() != null) {
@@ -236,6 +245,8 @@ public class Main {
         Table sourceTable =
                 tableEnv.fromDataStream(
                         sourceDataStream, expressionList.toArray(new Expression[0]));
+
+        checkTableConf(config.getReader());
         tableEnv.createTemporaryView(config.getReader().getTable().getTableName(), sourceTable);
 
         String transformSql = config.getJob().getTransformer().getTransformSql();
@@ -247,6 +258,8 @@ public class Main {
                 TableUtil.getTypeInformation(tableDataTypes, tableFieldNames);
         DataStream<RowData> dataStream =
                 tableEnv.toRetractStream(adaptTable, typeInformation).map(f -> f.f1);
+
+        checkTableConf(config.getWriter());
         tableEnv.createTemporaryView(config.getWriter().getTable().getTableName(), dataStream);
 
         return dataStream;
@@ -310,16 +323,32 @@ public class Main {
             factoryHelper.setRemotePluginPath(options.getRemoteFlinkxDistDir());
             factoryHelper.setPluginLoadMode(options.getPluginLoadMode());
             factoryHelper.setEnv(env);
+            factoryHelper.setExecutionMode(options.getMode());
 
             DirtyConf dirtyConf = DirtyConfUtil.parse(options);
             factoryHelper.registerCachedFile(
                     dirtyConf.getType(),
                     Thread.currentThread().getContextClassLoader(),
                     ConstantValue.DIRTY_DATA_DIR_NAME);
+            // TODO sql 支持restore.
 
             FactoryUtil.setFactoryUtilHelp(factoryHelper);
             TableFactoryService.setFactoryUtilHelp(factoryHelper);
         }
         PluginUtil.registerShipfileToCachedFile(options.getAddShipfile(), env);
+    }
+
+    /**
+     * Check required config item.
+     *
+     * @param operatorConf
+     */
+    private static void checkTableConf(OperatorConf operatorConf) {
+        if (operatorConf.getTable() == null) {
+            throw new JobConfigException(operatorConf.getName(), "table", "is missing");
+        }
+        if (StringUtils.isEmpty(operatorConf.getTable().getTableName())) {
+            throw new JobConfigException(operatorConf.getName(), "table.tableName", "is missing");
+        }
     }
 }

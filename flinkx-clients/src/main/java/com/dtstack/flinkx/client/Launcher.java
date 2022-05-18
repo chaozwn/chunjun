@@ -28,7 +28,6 @@ import com.dtstack.flinkx.enums.ClusterMode;
 import com.dtstack.flinkx.options.OptionParser;
 import com.dtstack.flinkx.options.Options;
 import com.dtstack.flinkx.util.ExecuteProcessHelper;
-import com.dtstack.flinkx.util.JsonModifyUtil;
 
 import org.apache.flink.client.deployment.ClusterDeploymentException;
 import org.apache.flink.configuration.ConfigConstants;
@@ -72,12 +71,6 @@ public class Launcher {
         for (int i = 0; i < argList.size(); i += 2) {
             temp.put(argList.get(i), argList.get(i + 1));
         }
-        // 对json中的值进行修改
-        String s = temp.get("-p");
-        if (StringUtils.isNotBlank(s)) {
-            HashMap<String, String> parameter = JsonModifyUtil.CommandTransform(s);
-            temp.put("-job", JsonModifyUtil.JsonValueReplace(temp.get("-job"), parameter));
-        }
 
         // 清空list，填充修改后的参数值
         argList.clear();
@@ -88,7 +81,7 @@ public class Launcher {
 
         JobDeployer jobDeployer = new JobDeployer(launcherOptions, argList);
 
-        ClusterClientHelper clusterClientHelper = null;
+        ClusterClientHelper clusterClientHelper;
         switch (ClusterMode.getByName(launcherOptions.getMode())) {
             case local:
                 clusterClientHelper = new LocalClusterClientHelper();
@@ -126,7 +119,8 @@ public class Launcher {
         clusterClientHelper.submit(jobDeployer);
     }
 
-    private static void findDefaultConfigDir(Options launcherOptions) {
+    private static void findDefaultConfigDir(Options launcherOptions)
+            throws ClusterDeploymentException {
         findDefaultFlinkxDistDir(launcherOptions);
 
         if (ClusterMode.local.name().equalsIgnoreCase(launcherOptions.getMode())) {
@@ -172,7 +166,8 @@ public class Launcher {
         }
     }
 
-    private static void findDefaultFlinkxDistDir(Options launcherOptions) {
+    private static void findDefaultFlinkxDistDir(Options launcherOptions)
+            throws ClusterDeploymentException {
         String distDir = launcherOptions.getFlinkxDistDir();
         if (StringUtils.isEmpty(distDir)) {
             String flinkxHome = getSystemProperty(KEY_FLINKX_HOME);
@@ -187,6 +182,9 @@ public class Launcher {
                 launcherOptions.setFlinkxDistDir(distDir);
             }
         }
+        if (StringUtils.isEmpty(distDir)) {
+            notConfiguredException(KEY_FLINKX_HOME);
+        }
         System.setProperty(ConfigConstants.ENV_FLINK_PLUGINS_DIR, distDir);
     }
 
@@ -197,5 +195,10 @@ public class Launcher {
         }
 
         return property;
+    }
+
+    private static void notConfiguredException(String propertyKey)
+            throws ClusterDeploymentException {
+        throw new ClusterDeploymentException(propertyKey + " is not configured.");
     }
 }
