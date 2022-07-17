@@ -227,7 +227,7 @@ public class BinlogInputFormat extends BaseRichInputFormat {
             checkBinlogFile(startPosition.getJournalName());
         } else if (MapUtils.isNotEmpty(binlogConf.getStart())) {
             startPosition = new EntryPosition();
-            String journalName = (String) binlogConf.getStart().get("journalName");
+            String journalName = (String) binlogConf.getStart().get("journal-name");
             checkBinlogFile(journalName);
 
             if (StringUtils.isNotEmpty(journalName)) {
@@ -254,7 +254,7 @@ public class BinlogInputFormat extends BaseRichInputFormat {
                             binlogConf.getUsername(),
                             binlogConf.getPassword())
                     .check(journalName)) {
-                throw new IllegalArgumentException("Can't find journalName: " + journalName);
+                throw new IllegalArgumentException("Can't find journal-name: " + journalName);
             }
         }
     }

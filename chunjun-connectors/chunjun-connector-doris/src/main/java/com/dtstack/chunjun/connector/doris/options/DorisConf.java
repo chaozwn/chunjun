@@ -18,24 +18,23 @@
 
 package com.dtstack.chunjun.connector.doris.options;
 
-import com.dtstack.chunjun.conf.ChunJunCommonConf;
+import com.dtstack.chunjun.connector.jdbc.conf.JdbcConf;
+import com.dtstack.chunjun.connector.jdbc.conf.SinkConnectionConf;
 import com.dtstack.chunjun.util.GsonUtil;
 import com.dtstack.chunjun.util.MapUtil;
 import com.dtstack.chunjun.util.StringUtil;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
  * @author tiezhu@dtstack
  * @date 2021/9/16 星期四
  */
-public class DorisConf extends ChunJunCommonConf {
-
-    private String fieldDelimiter;
-
-    private String lineDelimiter;
+public class DorisConf extends JdbcConf {
 
     private String database;
 
@@ -49,8 +48,13 @@ public class DorisConf extends ChunJunCommonConf {
 
     private List<String> feNodes;
 
+    private String url;
+
     /** * default value is 3 */
     private Integer maxRetries = 3;
+    /** retry load sleep timeout* */
+    private long waitRetryMills = 18000;
+
     /** 是否配置了NameMapping, true, RowData中将携带名称匹配后的数据库和表名, sink端配置的database和table失效* */
     private boolean nameMapped;
 
@@ -58,20 +62,12 @@ public class DorisConf extends ChunJunCommonConf {
 
     private Properties loadProperties;
 
-    public String getFieldDelimiter() {
-        return fieldDelimiter;
+    public long getWaitRetryMills() {
+        return waitRetryMills;
     }
 
-    public void setFieldDelimiter(String fieldDelimiter) {
-        this.fieldDelimiter = fieldDelimiter;
-    }
-
-    public String getLineDelimiter() {
-        return lineDelimiter;
-    }
-
-    public void setLineDelimiter(String lineDelimiter) {
-        this.lineDelimiter = lineDelimiter;
+    public void setWaitRetryMills(long waitRetryMills) {
+        this.waitRetryMills = waitRetryMills;
     }
 
     public String getDatabase() {
@@ -99,7 +95,7 @@ public class DorisConf extends ChunJunCommonConf {
     }
 
     public String getPassword() {
-        return password;
+        return Objects.isNull(password) ? "" : password;
     }
 
     public void setPassword(String password) {
@@ -154,6 +150,14 @@ public class DorisConf extends ChunJunCommonConf {
         this.nameMapped = nameMapped;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String serializeToString() {
         try {
             String optionsJson = GsonUtil.GSON.toJson(this);
@@ -162,5 +166,20 @@ public class DorisConf extends ChunJunCommonConf {
         } catch (IOException e) {
             throw new IllegalArgumentException("Doris Options Serialize to String failed.", e);
         }
+    }
+
+    public JdbcConf setToJdbcConf() {
+        JdbcConf jdbcConf = new JdbcConf();
+        SinkConnectionConf connectionConf = new SinkConnectionConf();
+        connectionConf.setJdbcUrl(url);
+        connectionConf.setPassword(password);
+        connectionConf.setSchema(database);
+        connectionConf.setTable(Collections.singletonList(table));
+        connectionConf.setUsername(username);
+        jdbcConf.setConnection(Collections.singletonList(connectionConf));
+        jdbcConf.setJdbcUrl(url);
+        jdbcConf.setPassword(password);
+        jdbcConf.setUsername(username);
+        return jdbcConf;
     }
 }

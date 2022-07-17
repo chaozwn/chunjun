@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -169,7 +170,7 @@ public class PreparedStmtProxy implements FieldNamedPreparedStatement {
             currentRowConverter = fieldNamedPreparedStatement.getRowConverter();
         } else {
             String key =
-                    getPstmtCacheKey(jdbcConf.getSchema(), jdbcConf.getTable(), RowKind.INSERT);
+                    getPstmtCacheKey(jdbcConf.getSchema(), jdbcConf.getTable(), row.getRowKind());
             DynamicPreparedStmt fieldNamedPreparedStatement =
                     pstmtCache.get(
                             key,
@@ -350,6 +351,11 @@ public class PreparedStmtProxy implements FieldNamedPreparedStatement {
     @Override
     public void setClob(int fieldIndex, Reader reader) throws SQLException {
         currentFieldNamedPstmt.setClob(fieldIndex, reader);
+    }
+
+    @Override
+    public void setArray(int fieldIndex, Array array) throws SQLException {
+        currentFieldNamedPstmt.setArray(fieldIndex, array);
     }
 
     @Override

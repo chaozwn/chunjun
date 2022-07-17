@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -175,6 +176,8 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
     protected boolean executeDdlAble;
     protected EventCenter eventCenter;
     protected MonitorConf monitorConf;
+
+    private boolean useAbstractColumn;
 
     private transient volatile Exception timerWriteException;
 
@@ -291,6 +294,10 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
             return;
         }
 
+        if (Objects.isNull(rows)) {
+            return;
+        }
+
         Exception closeException = null;
 
         if (null != timerWriteException) {
@@ -391,7 +398,8 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
     /** 初始化对象大小计算器 */
     protected void initRowSizeCalculator() {
         rowSizeCalculator =
-                RowSizeCalculator.getRowSizeCalculator(config.getRowSizeCalculatorType());
+                RowSizeCalculator.getRowSizeCalculator(
+                        config.getRowSizeCalculatorType(), useAbstractColumn);
     }
 
     /** 从checkpoint状态缓存map中恢复上次任务的指标信息 */
@@ -705,5 +713,9 @@ public abstract class BaseRichOutputFormat extends RichOutputFormat<RowData>
 
     public void setMonitorConf(MonitorConf monitorConf) {
         this.monitorConf = monitorConf;
+    }
+
+    public void setUseAbstractColumn(boolean useAbstractColumn) {
+        this.useAbstractColumn = useAbstractColumn;
     }
 }

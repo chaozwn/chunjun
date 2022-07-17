@@ -20,6 +20,7 @@ package com.dtstack.chunjun.connector.doris.sink;
 
 import com.dtstack.chunjun.conf.OperatorConf;
 import com.dtstack.chunjun.conf.SyncConf;
+import com.dtstack.chunjun.connector.doris.converter.DorisRowTypeConverter;
 import com.dtstack.chunjun.connector.doris.options.DorisConf;
 import com.dtstack.chunjun.connector.doris.options.DorisConfBuilder;
 import com.dtstack.chunjun.connector.doris.options.LoadConf;
@@ -49,13 +50,10 @@ import static com.dtstack.chunjun.connector.doris.options.DorisKeys.DORIS_REQUES
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.DORIS_WRITE_MODE_DEFAULT;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.EXEC_MEM_LIMIT_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.FE_NODES_KEY;
-import static com.dtstack.chunjun.connector.doris.options.DorisKeys.FIELD_DELIMITER;
-import static com.dtstack.chunjun.connector.doris.options.DorisKeys.FIELD_DELIMITER_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.FLUSH_INTERNAL_MS_KEY;
-import static com.dtstack.chunjun.connector.doris.options.DorisKeys.LINE_DELIMITER;
-import static com.dtstack.chunjun.connector.doris.options.DorisKeys.LINE_DELIMITER_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.LOAD_OPTIONS_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.LOAD_PROPERTIES_KEY;
+import static com.dtstack.chunjun.connector.doris.options.DorisKeys.MAX_RETRIES_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.PASSWORD_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.REQUEST_BATCH_SIZE_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.REQUEST_CONNECT_TIMEOUT_MS_KEY;
@@ -65,6 +63,7 @@ import static com.dtstack.chunjun.connector.doris.options.DorisKeys.REQUEST_RETR
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.REQUEST_TABLET_SIZE_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.TABLE_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.USER_NAME_KEY;
+import static com.dtstack.chunjun.connector.doris.options.DorisKeys.WAITRETRIES_MS_KEY;
 import static com.dtstack.chunjun.connector.doris.options.DorisKeys.WRITE_MODE_KEY;
 
 /**
@@ -136,20 +135,20 @@ public class DorisSinkFactory extends SinkFactory {
                         .setDatabase(parameter.getStringVal(DATABASE_KEY))
                         .setTable(parameter.getStringVal(TABLE_KEY))
                         .setFeNodes((List<String>) parameter.getVal(FE_NODES_KEY))
-                        .setFieldDelimiter(
-                                parameter.getStringVal(FIELD_DELIMITER_KEY, FIELD_DELIMITER))
-                        .setLineDelimiter(
-                                parameter.getStringVal(LINE_DELIMITER_KEY, LINE_DELIMITER))
                         .setLoadOptions(loadConf)
                         .setLoadProperties(
                                 parameter.getProperties(LOAD_PROPERTIES_KEY, new Properties()))
                         .setPassword(parameter.getStringVal(PASSWORD_KEY, ""))
-                        .setNameMapped(syncConf.getNameMappingConf() != null)
+                        .setNameMapped(
+                                syncConf.getNameMappingConf() != null
+                                        && !syncConf.getNameMappingConf().isEmpty())
                         .setWriteMode(
                                 parameter.getStringVal(WRITE_MODE_KEY, DORIS_WRITE_MODE_DEFAULT))
                         .setUsername(parameter.getStringVal(USER_NAME_KEY))
                         .setBatchSize(parameter.getIntVal(BATCH_SIZE_KEY, 1000))
                         .setFlushIntervalMills(parameter.getLongVal(FLUSH_INTERNAL_MS_KEY, 10000L))
+                        .setMaxRetries(parameter.getIntVal(MAX_RETRIES_KEY, 1))
+                        .setWaitRetryMills(parameter.getLongVal(WAITRETRIES_MS_KEY, 18000L))
                         .build();
         options.setColumn(syncConf.getWriter().getFieldList());
         super.initCommonConf(options);
@@ -157,13 +156,13 @@ public class DorisSinkFactory extends SinkFactory {
 
     @Override
     public DataStreamSink<RowData> createSink(DataStream<RowData> dataSet) {
-        DorisOutputFormatBuilder builder = new DorisOutputFormatBuilder();
+        DorisHttpOutputFormatBuilder builder = new DorisHttpOutputFormatBuilder();
         builder.setDorisOptions(options);
         return createOutput(dataSet, builder.finish());
     }
 
     @Override
     public RawTypeConverter getRawTypeConverter() {
-        return null;
+        return DorisRowTypeConverter::apply;
     }
 }

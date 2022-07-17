@@ -21,8 +21,8 @@ package com.dtstack.chunjun.connector.kudu.source;
 import com.dtstack.chunjun.conf.FieldConf;
 import com.dtstack.chunjun.conf.SyncConf;
 import com.dtstack.chunjun.connector.kudu.conf.KuduSourceConf;
+import com.dtstack.chunjun.connector.kudu.converter.KuduColumnConverter;
 import com.dtstack.chunjun.connector.kudu.converter.KuduRawTypeConverter;
-import com.dtstack.chunjun.connector.kudu.converter.KuduRowConverter;
 import com.dtstack.chunjun.converter.RawTypeConverter;
 import com.dtstack.chunjun.source.SourceFactory;
 import com.dtstack.chunjun.util.JsonUtil;
@@ -73,7 +73,8 @@ public class KuduSourceFactory extends SourceFactory {
         List<String> columnNameList = new ArrayList<>();
         fieldConfList.forEach(fieldConf -> columnNameList.add(fieldConf.getName()));
 
-        builder.setRowConverter(new KuduRowConverter(rowType, columnNameList));
+        builder.setRowConverter(
+                new KuduColumnConverter(rowType, columnNameList), useAbstractBaseColumn);
 
         return createInput(builder.finish());
     }

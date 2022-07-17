@@ -31,11 +31,19 @@ import java.time.LocalTime;
 public class TimeColumn extends AbstractBaseColumn {
 
     public TimeColumn(Time data) {
-        super(data);
+        super(data, 8);
+    }
+
+    public TimeColumn(Time data, int byteSize) {
+        super(data, byteSize);
+    }
+
+    public static TimeColumn from(Time data) {
+        return new TimeColumn(data, 0);
     }
 
     public TimeColumn(int data) {
-        super(Time.valueOf(LocalTime.ofNanoOfDay(data * 1_000_000L)));
+        super(Time.valueOf(LocalTime.ofNanoOfDay(data * 1_000_000L)), 8);
     }
 
     @Override
@@ -105,5 +113,10 @@ public class TimeColumn extends AbstractBaseColumn {
     @Override
     public Integer asInt() {
         throw new CastException("java.sql.Time", "Integer", this.asString());
+    }
+
+    @Override
+    public Short asShort() {
+        throw new CastException("java.sql.Time", "Short", this.asString());
     }
 }

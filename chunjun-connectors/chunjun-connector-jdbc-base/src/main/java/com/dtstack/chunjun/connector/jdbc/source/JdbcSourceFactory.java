@@ -92,6 +92,7 @@ public abstract class JdbcSourceFactory extends SourceFactory {
             }
         }
         initIncrementConfig(jdbcConf);
+        setDefaultSplitStrategy(jdbcConf);
         super.initCommonConf(jdbcConf);
         if (StringUtils.isBlank(jdbcConf.getCustomSql())) {
             rebuildJdbcConf();
@@ -126,7 +127,7 @@ public abstract class JdbcSourceFactory extends SourceFactory {
                     TableUtil.createRowType(jdbcConf.getColumn(), getRawTypeConverter());
             rowConverter = jdbcDialect.getRowConverter(rowType);
         }
-        builder.setRowConverter(rowConverter);
+        builder.setRowConverter(rowConverter, useAbstractBaseColumn);
 
         return createInput(builder.finish());
     }
@@ -138,6 +139,17 @@ public abstract class JdbcSourceFactory extends SourceFactory {
      */
     protected JdbcInputFormatBuilder getBuilder() {
         return new JdbcInputFormatBuilder(new JdbcInputFormat());
+    }
+
+    /** set default split strategy if splitStrategy is blank */
+    private void setDefaultSplitStrategy(JdbcConf jdbcConf) {
+        if (jdbcConf.getSplitStrategy() == null || jdbcConf.getSplitStrategy().equals("")) {
+            if (jdbcConf.isIncrement() && jdbcConf.getParallelism() > 1) {
+                jdbcConf.setSplitStrategy("mod");
+            } else {
+                jdbcConf.setSplitStrategy("range");
+            }
+        }
     }
 
     /**

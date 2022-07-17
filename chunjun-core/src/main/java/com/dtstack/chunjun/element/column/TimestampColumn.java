@@ -20,6 +20,8 @@ package com.dtstack.chunjun.element.column;
 import com.dtstack.chunjun.element.AbstractBaseColumn;
 import com.dtstack.chunjun.throwable.CastException;
 
+import org.apache.commons.net.ntp.TimeStamp;
+
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -34,36 +36,54 @@ public class TimestampColumn extends AbstractBaseColumn {
 
     private static final int DATETIME_STR_LENGTH = 19;
 
-    private int precision;
+    private final int precision;
 
     public TimestampColumn(Timestamp data) {
-        super(data);
+        super(data, 8);
         this.precision = 6;
     }
 
     public TimestampColumn(long data) {
-        super(new Timestamp(data));
+        super(new Timestamp(data), 8);
         this.precision = 6;
     }
 
     public TimestampColumn(Date data) {
-        super(new Timestamp(data.getTime()));
+        super(new Timestamp(data.getTime()), 8);
         this.precision = 6;
     }
 
     public TimestampColumn(Timestamp data, int precision) {
-        super(data);
+        super(data, 8);
+        this.precision = precision;
+    }
+
+    public TimestampColumn(Timestamp data, int precision, int byteSize) {
+        super(data, byteSize);
         this.precision = precision;
     }
 
     public TimestampColumn(long data, int precision) {
-        super(new Timestamp(data));
+        super(new Timestamp(data), 8);
+        this.precision = precision;
+    }
+
+    public TimestampColumn(long data, int precision, int byteSize) {
+        super(new Timestamp(data), byteSize);
         this.precision = precision;
     }
 
     public TimestampColumn(Date data, int precision) {
-        super(new Timestamp(data.getTime()));
+        super(new Timestamp(data.getTime()), 8);
         this.precision = precision;
+    }
+
+    public static TimestampColumn from(long data, int precision) {
+        return new TimestampColumn(data, precision, 0);
+    }
+
+    public static TimestampColumn from(Timestamp data, int precision) {
+        return new TimestampColumn(data, precision, 0);
     }
 
     @Override
@@ -120,7 +140,20 @@ public class TimestampColumn extends AbstractBaseColumn {
         if (null == data) {
             return null;
         }
-        throw new CastException("Timestamp", "BigDecimal", this.asString());
+        return new BigDecimal(((TimeStamp) data).getTime());
+    }
+
+    @Override
+    public Long asLong() {
+        if (null == data) {
+            return null;
+        }
+        return ((TimeStamp) data).getTime();
+    }
+
+    @Override
+    public Short asShort() {
+        throw new CastException("java.sql.Timestamp", "Short", this.asString());
     }
 
     @Override

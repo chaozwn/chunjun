@@ -99,7 +99,8 @@ public enum ColumnType {
     TIME,
     YEAR,
     BIT,
-    OBJECT;
+    OBJECT,
+    TIMESTAMPTZ;
 
     public static List<ColumnType> TIME_TYPE = Arrays.asList(DATE, DATETIME, TIME, TIMESTAMP);
 
@@ -140,6 +141,7 @@ public enum ColumnType {
                     DECFLOAT,
                     DECIMAL,
                     NUMBER,
+                    NUMERIC,
                     PRECISION,
                     DOUBLEPRECISION);
 

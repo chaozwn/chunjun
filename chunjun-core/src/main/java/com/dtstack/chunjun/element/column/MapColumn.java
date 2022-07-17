@@ -36,7 +36,18 @@ import java.util.Map;
 public class MapColumn extends AbstractBaseColumn {
 
     public MapColumn(Map<String, Object> data) {
-        super(data);
+        super(data, 0);
+        if (data != null) {
+            byteSize += data.toString().length();
+        }
+    }
+
+    public MapColumn(Map<String, Object> data, int byteSize) {
+        super(data, byteSize);
+    }
+
+    public static MapColumn from(Map<String, Object> data) {
+        return new MapColumn(data, 0);
     }
 
     @Override

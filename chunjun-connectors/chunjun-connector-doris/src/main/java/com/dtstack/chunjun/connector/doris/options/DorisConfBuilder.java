@@ -48,16 +48,6 @@ public class DorisConfBuilder {
         return this;
     }
 
-    public DorisConfBuilder setFieldDelimiter(String fieldDelimiter) {
-        this.dorisConf.setFieldDelimiter(fieldDelimiter);
-        return this;
-    }
-
-    public DorisConfBuilder setLineDelimiter(String lineDelimiter) {
-        this.dorisConf.setLineDelimiter(lineDelimiter);
-        return this;
-    }
-
     public DorisConfBuilder setUsername(String username) {
         this.dorisConf.setUsername(username);
         return this;
@@ -95,6 +85,16 @@ public class DorisConfBuilder {
 
     public DorisConfBuilder setFlushIntervalMills(long flushIntervalMills) {
         this.dorisConf.setFlushIntervalMills(flushIntervalMills);
+        return this;
+    }
+
+    public DorisConfBuilder setMaxRetries(int maxRetries) {
+        this.dorisConf.setMaxRetries(maxRetries);
+        return this;
+    }
+
+    public DorisConfBuilder setWaitRetryMills(long waitRetryMills) {
+        this.dorisConf.setWaitRetryMills(waitRetryMills);
         return this;
     }
 

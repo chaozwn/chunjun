@@ -18,6 +18,7 @@
 
 package com.dtstack.chunjun.metrics;
 
+import com.dtstack.chunjun.element.ColumnRowData;
 import com.dtstack.chunjun.throwable.ChunJunRuntimeException;
 import com.dtstack.chunjun.throwable.UnsupportedTypeException;
 
@@ -27,12 +28,15 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /** @author liuliu 2022/4/13 */
-public abstract class RowSizeCalculator {
+public abstract class RowSizeCalculator<T> {
 
-    public abstract long getObjectSize(Object object);
+    public abstract long getObjectSize(T object);
 
-    public static RowSizeCalculator getRowSizeCalculator(String calculatorType) {
-        if (calculatorType == null) return getRowSizeCalculator();
+    public static RowSizeCalculator getRowSizeCalculator(
+            String calculatorType, boolean useAbstractColumn) {
+        if (useAbstractColumn) {
+            return new SyncCalculator();
+        }
         switch (CalculatorType.getCalculatorTypeByName(calculatorType)) {
             case TO_STRING_CALCULATOR:
                 return new RowToStringCalculator();
@@ -49,45 +53,53 @@ public abstract class RowSizeCalculator {
      * if jdk support,use {@link jdk.nashorn.internal.ir.debug.ObjectSizeCalculator} else use
      * toString().getBytes().length
      *
+     * <p>ObjectSizeCalculator is in jre/lib/ext/nashorn.jar,In order to be able to determine
+     * correctly in different JDK, we call it directly once
+     *
      * @return RowSizeCalculator
      */
     public static RowSizeCalculator getRowSizeCalculator() {
-        String vmName = System.getProperty("java.vm.name");
-        String dataModel = System.getProperty("sun.arch.data.model");
-        if (vmName != null
-                && (vmName.startsWith("OpenJDK ") || vmName.startsWith("Java HotSpot(TM) "))) {
-            if ("32".equals(dataModel) || "64".equals(dataModel)) {
-                return new RowObjectSizeCalculator();
-            }
+        try {
+            ObjectSizeCalculator.getObjectSize("");
+            return new RowObjectSizeCalculator();
+        } catch (Throwable e) {
+            return new RowToStringCalculator();
         }
-        return new RowToStringCalculator();
     }
 
-    static class RowObjectSizeCalculator extends RowSizeCalculator {
+    static class RowObjectSizeCalculator extends RowSizeCalculator<Object> {
         @Override
         public long getObjectSize(Object object) {
             return ObjectSizeCalculator.getObjectSize(object);
         }
     }
 
-    static class RowToStringCalculator extends RowSizeCalculator {
+    static class RowToStringCalculator extends RowSizeCalculator<Object> {
         @Override
         public long getObjectSize(Object object) {
             return object.toString().getBytes().length;
         }
     }
 
-    static class UndoCalculator extends RowSizeCalculator {
+    static class UndoCalculator extends RowSizeCalculator<Object> {
         @Override
         public long getObjectSize(Object object) {
             return 0;
         }
     }
 
+    static class SyncCalculator extends RowSizeCalculator<ColumnRowData> {
+        @Override
+        public long getObjectSize(ColumnRowData object) {
+            return object.getByteSize();
+        }
+    }
+
     public enum CalculatorType {
         TO_STRING_CALCULATOR("toStringCalculator"),
         OBJECT_SIZE_CALCULATOR("objectSizeCalculator"),
-        UNDO_CALCULATOR("undoCalculator");
+        UNDO_CALCULATOR("undoCalculator"),
+        SYNC_CALCULATOR("syncCalculator");
 
         private String typeName;
 
@@ -111,7 +123,7 @@ public abstract class RowSizeCalculator {
             }
             throw new ChunJunRuntimeException(
                     String.format(
-                            "ChunJun CalculatorType only one of %s",
+                            "ChunJun CalculatorType only support one of %s",
                             Arrays.stream(CalculatorType.values())
                                     .map(CalculatorType::getTypeName)
                                     .collect(Collectors.toList())));

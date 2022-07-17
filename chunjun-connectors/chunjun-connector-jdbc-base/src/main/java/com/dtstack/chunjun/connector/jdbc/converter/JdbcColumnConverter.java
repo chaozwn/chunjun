@@ -21,6 +21,7 @@ package com.dtstack.chunjun.connector.jdbc.converter;
 import com.dtstack.chunjun.conf.ChunJunCommonConf;
 import com.dtstack.chunjun.conf.FieldConf;
 import com.dtstack.chunjun.connector.jdbc.statement.FieldNamedPreparedStatement;
+import com.dtstack.chunjun.constants.ConstantValue;
 import com.dtstack.chunjun.converter.AbstractRowConverter;
 import com.dtstack.chunjun.converter.IDeserializationConverter;
 import com.dtstack.chunjun.converter.ISerializationConverter;
@@ -88,12 +89,25 @@ public class JdbcColumnConverter
     @SuppressWarnings("unchecked")
     public RowData toInternal(ResultSet resultSet) throws Exception {
         List<FieldConf> fieldConfList = commonConf.getColumn();
-        ColumnRowData result = new ColumnRowData(fieldConfList.size());
+        ColumnRowData result;
+        if (fieldConfList.size() == 1
+                && ConstantValue.STAR_SYMBOL.equals(fieldConfList.get(0).getName())) {
+            result = new ColumnRowData(fieldTypes.length);
+            for (int index = 0; index < fieldTypes.length; index++) {
+                Object field = resultSet.getObject(index + 1);
+                AbstractBaseColumn baseColumn =
+                        (AbstractBaseColumn) toInternalConverters.get(index).deserialize(field);
+                result.addField(baseColumn);
+            }
+            return result;
+        }
         int converterIndex = 0;
+        result = new ColumnRowData(fieldConfList.size());
         for (FieldConf fieldConf : fieldConfList) {
             AbstractBaseColumn baseColumn = null;
             if (StringUtils.isBlank(fieldConf.getValue())) {
                 Object field = resultSet.getObject(converterIndex + 1);
+
                 baseColumn =
                         (AbstractBaseColumn)
                                 toInternalConverters.get(converterIndex).deserialize(field);

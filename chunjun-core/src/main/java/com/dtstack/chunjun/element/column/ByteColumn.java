@@ -32,11 +32,19 @@ import java.sql.Timestamp;
  */
 public class ByteColumn extends AbstractBaseColumn {
     public ByteColumn(byte data) {
-        super(data);
+        super(data, 1);
+    }
+
+    public ByteColumn(byte data, int byteSize) {
+        super(data, byteSize);
+    }
+
+    public static ByteColumn from(byte data) {
+        return new ByteColumn(data, 0);
     }
 
     public ByteColumn(char data) {
-        super(data);
+        super(data, 1);
     }
 
     @Override
@@ -56,12 +64,12 @@ public class ByteColumn extends AbstractBaseColumn {
 
     @Override
     public BigDecimal asBigDecimal() {
-        throw new CastException("Byte", "BigDecimal", String.valueOf(data));
+        return new BigDecimal((byte) data);
     }
 
     @Override
     public Timestamp asTimestamp() {
-        throw new CastException("Byte", "Timestamp", String.valueOf(data));
+        throw new CastException("byte", "Timestamp", String.valueOf(data));
     }
 
     @Override
@@ -69,7 +77,7 @@ public class ByteColumn extends AbstractBaseColumn {
         if (null == data) {
             return null;
         }
-        throw new CastException("Byte", "java.sql.Time", String.valueOf(data));
+        throw new CastException("byte", "java.sql.Time", String.valueOf(data));
     }
 
     @Override
@@ -77,11 +85,11 @@ public class ByteColumn extends AbstractBaseColumn {
         if (null == data) {
             return null;
         }
-        throw new CastException("Byte", "java.sql.Date", String.valueOf(data));
+        throw new CastException("byte", "java.sql.Date", String.valueOf(data));
     }
 
     @Override
     public String asTimestampStr() {
-        throw new CastException("Byte", "Timestamp", String.valueOf(data));
+        throw new CastException("byte", "Timestamp", String.valueOf(data));
     }
 }
