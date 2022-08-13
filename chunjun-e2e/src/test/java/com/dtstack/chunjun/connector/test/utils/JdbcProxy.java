@@ -47,11 +47,11 @@ public class JdbcProxy {
     }
 
     public void checkResult(List<String> expectedResult, String table, String[] fields)
-        throws SQLException, ClassNotFoundException {
+            throws SQLException, ClassNotFoundException {
         Class.forName(driverClass);
         try (Connection dbConn = DriverManager.getConnection(url, userName, password);
-             PreparedStatement statement = dbConn.prepareStatement("select * from " + table);
-             ResultSet resultSet = statement.executeQuery()) {
+                PreparedStatement statement = dbConn.prepareStatement("select * from " + table);
+                ResultSet resultSet = statement.executeQuery()) {
             List<String> results = new ArrayList<>();
             while (resultSet.next()) {
                 List<String> result = new ArrayList<>();
@@ -73,8 +73,8 @@ public class JdbcProxy {
     }
 
     public void checkResultWithTimeout(
-        List<String> expectedResult, String table, String[] fields, long timeout)
-        throws Exception {
+            List<String> expectedResult, String table, String[] fields, long timeout)
+            throws Exception {
         long endTimeout = System.currentTimeMillis() + timeout;
         boolean result = false;
         while (System.currentTimeMillis() < endTimeout) {

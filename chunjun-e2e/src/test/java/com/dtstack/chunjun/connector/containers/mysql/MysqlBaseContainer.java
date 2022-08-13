@@ -18,15 +18,14 @@
 
 package com.dtstack.chunjun.connector.containers.mysql;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.time.Duration;
-
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategyTarget;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.time.Duration;
 
 public class MysqlBaseContainer extends JdbcDatabaseContainer {
 
@@ -37,21 +36,21 @@ public class MysqlBaseContainer extends JdbcDatabaseContainer {
     public static final Integer MYSQL_PORT = 3306;
 
     public MysqlBaseContainer(String imageName, Path dockerfile) throws URISyntaxException {
-        super(
-            new ImageFromDockerfile(imageName, false)
-                .withDockerfile(dockerfile));
+        super(new ImageFromDockerfile(imageName, false).withDockerfile(dockerfile));
+        withEnv("MYSQL_USER", "admin");
+        withEnv("MYSQL_PASSWORD", password);
+        withEnv("MYSQL_ROOT_PASSWORD", password);
         withExposedPorts(MYSQL_PORT);
         waitingFor(
-            new WaitStrategy() {
-                @Override
-                public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {
-                }
+                new WaitStrategy() {
+                    @Override
+                    public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {}
 
-                @Override
-                public WaitStrategy withStartupTimeout(Duration startupTimeout) {
-                    return null;
-                }
-            });
+                    @Override
+                    public WaitStrategy withStartupTimeout(Duration startupTimeout) {
+                        return null;
+                    }
+                });
     }
 
     public int getDatabasePort() {
@@ -76,12 +75,12 @@ public class MysqlBaseContainer extends JdbcDatabaseContainer {
     public String getJdbcUrl(String databaseName) {
         String additionalUrlParams = constructUrlParameters("?", "&");
         return "jdbc:mysql://"
-            + getHost()
-            + ":"
-            + getDatabasePort()
-            + "/"
-            + databaseName
-            + additionalUrlParams;
+                + getHost()
+                + ":"
+                + getDatabasePort()
+                + "/"
+                + databaseName
+                + additionalUrlParams;
     }
 
     @Override

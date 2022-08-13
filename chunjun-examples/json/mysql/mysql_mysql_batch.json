@@ -72,7 +72,7 @@
               "connection": [
                 {
                   "jdbcUrl": [
-                    "jdbc:mysql://chunjun-e2e-mysql:3306/chunjun?useSSL=false&allowPublicKeyRetrieval=true"
+                    "jdbc:mysql://localhost:40057/chunjun?useSSL=false&allowPublicKeyRetrieval=true"
                   ],
                   "table": [
                     "test"
@@ -88,7 +88,7 @@
               "password": "123456",
               "connection": [
                 {
-                  "jdbcUrl": "jdbc:mysql://chunjun-e2e-mysql:3306/chunjun?useSSL=false&allowPublicKeyRetrieval=true",
+                  "jdbcUrl": "jdbc:mysql://localhost:40057/chunjun?useSSL=false&allowPublicKeyRetrieval=true",
                   "table": [
                     "test_sink"
                   ]

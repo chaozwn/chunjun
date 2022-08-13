@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 
 public class Mysql8Container extends MysqlBaseContainer {
     private static final URL MYSQL8_DOCKERFILE =
-        MysqlBaseContainer.class.getClassLoader().getResource("docker/mysql/Mysql8Dockerfile");
+            MysqlBaseContainer.class.getClassLoader().getResource("docker/mysql/Mysql8Dockerfile");
 
     private static final String MYSQL8_HOST = "chunjun-e2e-mysql8";
 
