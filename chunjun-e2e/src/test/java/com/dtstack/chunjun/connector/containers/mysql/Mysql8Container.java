@@ -16,31 +16,19 @@
  * limitations under the License.
  */
 
-package com.dtstack.chunjun.connector.test.containers;
-
-import com.dtstack.chunjun.connector.test.ChunjunBaseE2eTest;
-
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
+package com.dtstack.chunjun.connector.containers.mysql;
 
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 
-/**
- * @author jayce
- * @version 1.0
- * @date 2022/8/11 17:00
- */
-public class FlinkStandaloneContainer extends GenericContainer<FlinkStandaloneContainer> {
-    private static final URL FLINK_STANDALONE_DOCKFILE =
-            ChunjunBaseE2eTest.class
-                    .getClassLoader()
-                    .getResource("docker/flink/standalone/Dockerfile");
+public class Mysql8Container extends MysqlBaseContainer {
+    private static final URL MYSQL8_DOCKERFILE =
+        MysqlBaseContainer.class.getClassLoader().getResource("docker/mysql/Mysql8Dockerfile");
 
-    public FlinkStandaloneContainer(String imageName) throws URISyntaxException {
-        super(
-                new ImageFromDockerfile(imageName, false)
-                        .withDockerfile(Paths.get(FLINK_STANDALONE_DOCKFILE.toURI())));
+    private static final String MYSQL8_HOST = "chunjun-e2e-mysql8";
+
+    public Mysql8Container() throws URISyntaxException {
+        super(MYSQL8_HOST, Paths.get(MYSQL8_DOCKERFILE.toURI()));
     }
 }

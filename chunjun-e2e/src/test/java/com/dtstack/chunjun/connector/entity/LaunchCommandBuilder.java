@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.dtstack.chunjun.connector.test.entity;
+package com.dtstack.chunjun.connector.entity;
 
 import com.dtstack.chunjun.enums.ClusterMode;
 import com.dtstack.chunjun.util.GsonUtil;

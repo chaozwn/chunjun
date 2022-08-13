@@ -15,100 +15,67 @@
                   "type": "string"
                 },
                 {
-                  "name": "money",
-                  "type": "decimal"
+                  "name": "idcard",
+                  "type": "string"
                 },
                 {
-                  "name": "aphone",
-                  "type": "bigint"
-                },
-                {
-                  "name": "aqq",
-                  "type": "varchar"
-                },
-                {
-                  "name": "awechat",
-                  "type": "varchar"
-                },
-                {
-                  "name": "aincome",
-                  "type": "decimal"
-                },
-                {
-                  "name": "abirthday",
-                  "type": "datetime"
-                },
-                {
-                  "name": "atoday",
+                  "name": "birthday",
                   "type": "date"
                 },
                 {
-                  "name": "atimecurrent",
-                  "type": "time"
+                  "name": "mobile",
+                  "type": "varchar"
                 },
                 {
-                  "name": "bphone",
+                  "name": "email",
+                  "type": "varchar"
+                },
+                {
+                  "name": "gender",
+                  "type": "tinyint"
+                },
+                {
+                  "name": "create_time",
+                  "type": "timestamp"
+                },
+                {
+                  "name": "type_smallint",
+                  "type": "smallint"
+                },
+                {
+                  "name": "type_mediumint",
+                  "type": "mediumint"
+                },
+                {
+                  "name": "type_bigint",
                   "type": "bigint"
                 },
                 {
-                  "name": "bqq",
-                  "type": "varchar"
-                },
-                {
-                  "name": "bwechat",
-                  "type": "varchar"
-                },
-                {
-                  "name": "bincome",
+                  "name": "type_decimal",
                   "type": "decimal"
                 },
                 {
-                  "name": "bbirthday",
-                  "type": "datetime"
-                },
-                {
-                  "name": "btoday",
-                  "type": "date"
-                },
-                {
-                  "name": "btimecurrent",
-                  "type": "time"
-                },
-                {
-                  "name": "raw_date",
-                  "type": "string",
-                  "value": "2014-12-12 14:24:16"
-                },
-                {
-                  "name": "aboolean",
-                  "type": "boolean"
-                },
-                {
-                  "name": "adouble",
-                  "type": "double"
-                },
-                {
-                  "name": "afloat",
+                  "name": "type_float",
                   "type": "float"
                 },
                 {
-                  "name": "achar",
-                  "type": "char"
+                  "name": "type_double",
+                  "type": "double"
                 },
                 {
-                  "name": "atinyint",
-                  "type": "tinyint"
+                  "name": "type_text",
+                  "type": "text"
                 }
               ],
               "username": "root",
-              "password": "root",
+              "password": "123456",
               "connection": [
                 {
                   "jdbcUrl": [
-                    "jdbc:mysql://localhost:3306/test?useSSL=false"
+                    "jdbc:mysql://chunjun-e2e-mysql:3306/chunjun?useSSL=false&allowPublicKeyRetrieval=true"
                   ],
                   "table": [
-                    "baserow"
+                    "test"
                   ]
                 }
               ]
@@ -118,12 +85,12 @@
             "name": "mysqlwriter",
             "parameter": {
               "username": "root",
-              "password": "root",
+              "password": "123456",
               "connection": [
                 {
-                  "jdbcUrl": "jdbc:mysql://localhost:3306/test?useSSL=false",
+                  "jdbcUrl": "jdbc:mysql://chunjun-e2e-mysql:3306/chunjun?useSSL=false&allowPublicKeyRetrieval=true",
                   "table": [
-                    "baserow_sync"
+                    "test_sink"
                   ]
                 }
               ],
@@ -138,88 +105,56 @@
                   "type": "string"
                 },
                 {
-                  "name": "money",
-                  "type": "decimal"
-                },
-                {
-                  "name": "aphone",
-                  "type": "bigint"
-                },
-                {
-                  "name": "aqq",
-                  "type": "varchar"
-                },
-                {
-                  "name": "awechat",
-                  "type": "varchar"
-                },
-                {
-                  "name": "aincome",
-                  "type": "decimal"
-                },
-                {
-                  "name": "abirthday",
-                  "type": "datetime"
-                },
-                {
-                  "name": "atoday",
-                  "type": "date"
-                },
-                {
-                  "name": "atimecurrent",
-                  "type": "time"
-                },
-                {
-                  "name": "bphone",
-                  "type": "bigint"
-                },
-                {
-                  "name": "bqq",
-                  "type": "varchar"
-                },
-                {
-                  "name": "bwechat",
-                  "type": "varchar"
-                },
-                {
-                  "name": "bincome",
-                  "type": "decimal"
-                },
-                {
-                  "name": "bbirthday",
-                  "type": "datetime"
-                },
-                {
-                  "name": "btoday",
-                  "type": "date"
-                },
-                {
-                  "name": "btimecurrent",
-                  "type": "time"
-                },
-                {
-                  "name": "raw_date",
+                  "name": "idcard",
                   "type": "string"
                 },
                 {
-                  "name": "aboolean",
-                  "type": "boolean"
+                  "name": "birthday",
+                  "type": "date"
                 },
                 {
-                  "name": "adouble",
-                  "type": "double"
+                  "name": "mobile",
+                  "type": "varchar"
                 },
                 {
-                  "name": "afloat",
+                  "name": "email",
+                  "type": "varchar"
+                },
+                {
+                  "name": "gender",
+                  "type": "tinyint"
+                },
+                {
+                  "name": "create_time",
+                  "type": "timestamp"
+                },
+                {
+                  "name": "type_smallint",
+                  "type": "smallint"
+                },
+                {
+                  "name": "type_mediumint",
+                  "type": "mediumint"
+                },
+                {
+                  "name": "type_bigint",
+                  "type": "bigint"
+                },
+                {
+                  "name": "type_decimal",
+                  "type": "decimal"
+                },
+                {
+                  "name": "type_float",
                   "type": "float"
                 },
                 {
-                  "name": "achar",
-                  "type": "char"
+                  "name": "type_double",
+                  "type": "double"
                 },
                 {
-                  "name": "atinyint",
-                  "type": "tinyint"
+                  "name": "type_text",
+                  "type": "text"
                 }
               ]
             }

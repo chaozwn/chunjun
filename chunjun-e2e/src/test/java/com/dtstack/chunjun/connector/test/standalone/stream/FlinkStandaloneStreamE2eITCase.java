@@ -16,22 +16,23 @@
  * limitations under the License.
  */
 
-package com.dtstack.chunjun.connector.test;
+package com.dtstack.chunjun.connector.test.standalone.stream;
 
-import com.dtstack.chunjun.connector.test.entity.JobAccumulatorResult;
+import com.dtstack.chunjun.connector.ChunjunBaseE2eTest;
+import com.dtstack.chunjun.connector.entity.JobAccumulatorResult;
+import com.dtstack.chunjun.connector.test.utils.ChunjunFlinkStandaloneTestEnvironment;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.Duration;
 
-import static com.dtstack.chunjun.connector.test.ChunjunBaseE2eTest.CHUNJUN_HOME;
-
-public class FlinkStandaloneStreamE2eTests extends ChunjunFlinkStandaloneE2eTest {
+public class FlinkStandaloneStreamE2eITCase extends ChunjunFlinkStandaloneTestEnvironment {
 
     @Test
     public void testStream() throws Exception {
-        submitSyncJobOnStandLone(CHUNJUN_HOME + "/chunjun-examples/json/stream/stream.json");
+        submitSyncJobOnStandLone(
+                ChunjunBaseE2eTest.CHUNJUN_HOME + "/chunjun-examples/json/stream/stream.json");
         JobAccumulatorResult jobAccumulatorResult = waitUntilJobFinished(Duration.ofMinutes(30));
 
         Assert.assertEquals(jobAccumulatorResult.getNumRead(), 30);
