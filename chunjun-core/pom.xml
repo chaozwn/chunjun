@@ -330,10 +330,10 @@
 								</includes>
 							</artifactSet>
 							<relocations>
-								<relocation>
-									<pattern>com.google.common</pattern>
-									<shadedPattern>shade.core.com.google.common</shadedPattern>
-								</relocation>
+								<!--								<relocation>-->
+								<!--									<pattern>com.google.common</pattern>-->
+								<!--									<shadedPattern>shade.core.com.google.common</shadedPattern>-->
+								<!--								</relocation>-->
 								<relocation>
 									<pattern>com.google.thirdparty</pattern>
 									<shadedPattern>shade.core.com.google.thirdparty</shadedPattern>
@@ -347,6 +347,16 @@
 									<shadedPattern>shade.core.io.prometheus.client</shadedPattern>
 								</relocation>
 							</relocations>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
@@ -365,15 +375,15 @@
 						<configuration>
 							<tasks>
 								<copy todir="${basedir}/../${dist.dir}/"
-									  file="${basedir}/target/${project.artifactId}-${project.version}.jar"/>
+									  file="${basedir}/target/${project.artifactId}-${project.version}.jar"
+								/>
 								<move file="${basedir}/../${dist.dir}/${project.artifactId}-${project.version}.jar"
-									  tofile="${basedir}/../${dist.dir}/${project.artifactId}.jar"/>
+									  tofile="${basedir}/../${dist.dir}/${project.artifactId}-test.jar"/>
 								<delete>
 									<fileset dir="${basedir}/../${dist.dir}/"
 											 includes="${project.artifactId}-*.jar"
 											 excludes="${project.artifactId}.jar"/>
 								</delete>
-
 							</tasks>
 						</configuration>
 					</execution>

@@ -16,31 +16,35 @@
  * limitations under the License.
  */
 
-package com.dtstack.chunjun.connector.test.containers;
-
-import com.dtstack.chunjun.connector.test.ChunjunBaseE2eTest;
+package com.dtstack.chunjun.connector.containers.mysql;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategyTarget;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.time.Duration;
 
-/**
- * @author jayce
- * @version 1.0
- * @date 2022/8/11 17:00
- */
-public class FlinkStandaloneContainer extends GenericContainer<FlinkStandaloneContainer> {
-    private static final URL FLINK_STANDALONE_DOCKFILE =
-            ChunjunBaseE2eTest.class
-                    .getClassLoader()
-                    .getResource("docker/flink/standalone/Dockerfile");
+public class Mysql5Container extends GenericContainer<Mysql5Container> {
+    private static final URL MYSQL5_DOCKERFILE =
+            Mysql5Container.class.getClassLoader().getResource("docker/mysql/Mysql5Dockerfile");
 
-    public FlinkStandaloneContainer(String imageName) throws URISyntaxException {
+    public Mysql5Container(String imageName) throws URISyntaxException {
         super(
                 new ImageFromDockerfile(imageName, false)
-                        .withDockerfile(Paths.get(FLINK_STANDALONE_DOCKFILE.toURI())));
+                        .withDockerfile(Paths.get(MYSQL5_DOCKERFILE.toURI())));
+        waitingFor(
+                new WaitStrategy() {
+                    @Override
+                    public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {}
+
+                    @Override
+                    public WaitStrategy withStartupTimeout(Duration startupTimeout) {
+                        return null;
+                    }
+                });
     }
 }

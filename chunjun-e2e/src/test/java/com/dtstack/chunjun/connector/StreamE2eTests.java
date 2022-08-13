@@ -16,28 +16,22 @@
  * limitations under the License.
  */
 
-package com.dtstack.chunjun.connector.test.entity;
+package com.dtstack.chunjun.connector;
 
-public class JobAccumulatorResult {
-    private final long numRead;
-    private final long numWrite;
-    private final long nErrors;
+import com.dtstack.chunjun.connector.entity.JobAccumulatorResult;
 
-    public JobAccumulatorResult(long numRead, long numWrite, long nErrors) {
-        this.numRead = numRead;
-        this.numWrite = numWrite;
-        this.nErrors = nErrors;
-    }
+import org.junit.Assert;
+import org.junit.Test;
 
-    public long getNumRead() {
-        return numRead;
-    }
+import java.time.Duration;
 
-    public long getNumWrite() {
-        return numWrite;
-    }
+public class StreamE2eTests extends ChunjunBaseE2eTest {
 
-    public long getNumError() {
-        return nErrors;
+    @Test
+    public void test() throws Exception {
+        submitSyncJobOnStandLone(CHUNJUN_HOME + "\\chunjun-examples\\json\\stream\\stream.json");
+        JobAccumulatorResult jobAccumulatorResult = waitUntilJobFinished(Duration.ofMinutes(30));
+
+        Assert.assertEquals(jobAccumulatorResult.getNumRead(), 30);
     }
 }
