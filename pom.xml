@@ -21,6 +21,7 @@
 		<module>chunjun-restore</module>
 		<module>chunjun-sql</module>
 		<module>chunjun-assembly</module>
+		<module>chunjun-e2e</module>
 		<!--		<module>chunjun-local-test</module>-->
 	</modules>
 
@@ -211,6 +212,22 @@
 	</dependencies>
 
 	<repositories>
+
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+
+		<repository>
+			<id>sonatype</id>
+			<url>https://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+
+		<repository>
+			<id>aliyun</id>
+			<url>https://maven.aliyun.com/repository/central</url>
+		</repository>
+
 		<!-- for greenplum -->
 		<repository>
 			<id>hand-china</id>
